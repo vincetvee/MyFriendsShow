@@ -1,4 +1,5 @@
-﻿using MyFriendsShow.Event;
+﻿using Autofac.Features.Indexed;
+using MyFriendsShow.Event;
 using Prism.Commands;
 using Prism.Events;
 using System;
@@ -14,19 +15,19 @@ namespace MyFriendsShow.ViewModel
 
          public ICommand CreateNewDetailCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
-        public Func<IFriendDetailViewModel> _friendDetailViewModelCreator { get; }
-        public Func<IMeetingDetailViewModel> _meetingDetailViewModelCreator { get; }
+
+        private IIndex<string, IDetailViewModel> _detailViewModelCreator;
+
 
         private IEventAggregator _eventAggregator;
         private IDetailViewModel _detailViewModel;
 
         public MainViewModel(INavigationViewModel navigationViewModel,
-           Func<IFriendDetailViewModel> friendDetailViewModelCreator,
-           Func<IMeetingDetailViewModel> meetingDetailViewModelCreator,
+           IIndex<string, IDetailViewModel>detailViewModelCreator,
             IEventAggregator eventAggregator)
         {
-            _friendDetailViewModelCreator = friendDetailViewModelCreator;
-            _meetingDetailViewModelCreator = meetingDetailViewModelCreator;
+            _detailViewModelCreator = detailViewModelCreator;
+           
 
             _eventAggregator = eventAggregator;
            // _messageDialogService = messageDailogService;
@@ -67,24 +68,14 @@ namespace MyFriendsShow.ViewModel
                 }
             }
 
-             switch(args.ViewModelName)
-             {
-                case nameof(FriendDetailViewModel):
-                    DetailViewModel = _friendDetailViewModelCreator();
-                    break;
-                case nameof(MeetingDetailViewModel):
-                    DetailViewModel = _meetingDetailViewModelCreator();
-                    break;
-                default:
-                    throw new Exception($"ViewModel {args.ViewModelName} not mapped");
-
-             }
+            DetailViewModel = _detailViewModelCreator[args.ViewModelName];
             await DetailViewModel.LoadAsync(args.Id);
         }
 
         private void OnCreateNewDetailExecute( Type viewModelType)
         {
-            OnOpenDetailView(new OpenDetailViewEventArgs { ViewModelName = viewModelType.Name });
+            OnOpenDetailView(
+                new OpenDetailViewEventArgs { ViewModelName = viewModelType.Name });
         }
 
         private void AfterDetailDeleted(AfterDetailDeletedEventArgs args)

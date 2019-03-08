@@ -23,7 +23,8 @@ namespace MyFriendsShow.ViewModel
             _meetingLookupService = meetingLookupService;
             _eventAggregrator = eventAggregator;
             Friends  = new ObservableCollection<NavigationItemViewModel>();
-            Meetings  = new ObservableCollection<NavigationItemViewModel>();
+            Meetings = new ObservableCollection<NavigationItemViewModel>();
+
             _eventAggregrator.GetEvent<AfterDetailSavedEvent>().Subscribe(AfterDetailSaved );
             _eventAggregrator.GetEvent<AfterDetailDeletedEvent>().Subscribe(AfterDetailDeleted);
         }
@@ -39,19 +40,20 @@ namespace MyFriendsShow.ViewModel
                     nameof(FriendDetailViewModel),
                     _eventAggregrator));
             }
-
             lookup = await _meetingLookupService.GetMeetingLookupAsync();
             Meetings.Clear();
             foreach (var item in lookup)
             {
-                 Meetings.Add(new NavigationItemViewModel(item.Id, item.DisplayMember,
+                Meetings.Add(new NavigationItemViewModel(item.Id, item.DisplayMember,
                     nameof(MeetingDetailViewModel),
                     _eventAggregrator));
             }
+
         }
         
         public  ObservableCollection<NavigationItemViewModel> Friends { get; }
-        public  ObservableCollection<NavigationItemViewModel> Meetings { get; }
+        public ObservableCollection<NavigationItemViewModel> Meetings { get; }
+
         private void AfterDetailDeleted(AfterDetailDeletedEventArgs args)
         {
             switch (args.ViewModelName)
@@ -67,7 +69,7 @@ namespace MyFriendsShow.ViewModel
             }
         }
 
-        private void AfterDetailDeleted(ObservableCollection<NavigationItemViewModel>items,
+        private void AfterDetailDeleted(ObservableCollection<NavigationItemViewModel> items,
             AfterDetailDeletedEventArgs args)
         {
             var item = items.SingleOrDefault(f => f.Id == args.Id);
@@ -80,7 +82,7 @@ namespace MyFriendsShow.ViewModel
         private void AfterDetailSaved(AfterDetailSavedEventArgs args)
         {
             switch (args.ViewModelName)
-            {
+            {               
                 case nameof(FriendDetailViewModel):
                     AfterDetailSaved(Friends, args);
                     break;

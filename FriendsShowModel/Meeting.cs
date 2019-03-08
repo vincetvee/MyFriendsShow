@@ -11,11 +11,15 @@ namespace FriendsShow.Model
         {
             Friends = new Collection<Friend>();
         }
+
         public int Id { get; set; }
+
         [Required]
         [StringLength(50)]
         public string Title { get; set; }
+
         public DateTime DateFrom { get; set; }
+
         public DateTime DateTo { get; set; }
 
         public ICollection<Friend> Friends { get; set; }

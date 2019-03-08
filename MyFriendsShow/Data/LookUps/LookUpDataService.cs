@@ -48,9 +48,10 @@ namespace MyFriendsShow.Data.LookUps
             }
         }
 
-        public async Task<List<LookupItem>> GetMeetingLookupAsync()
+
+        public  async Task<List<LookupItem>> GetMeetingLookupAsync()
         {
-            using (var ctx = _contextCreator())
+            using (var ctx =_contextCreator())
             {
                 var items = await ctx.Meetings.AsNoTracking()
                      .Select(m =>
@@ -58,8 +59,7 @@ namespace MyFriendsShow.Data.LookUps
                      {
                          Id = m.Id,
                          DisplayMember = m.Title
-                     })
-                     .ToListAsync();
+                     }).ToListAsync();
                 return items;
             }
         }

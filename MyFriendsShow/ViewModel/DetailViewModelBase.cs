@@ -56,6 +56,7 @@ namespace MyFriendsShow.ViewModel
                 ViewModelName = this.GetType().Name
             });
         }
+
          protected virtual void RaiseDetailSaveEvent(int modelId, string displayMember)
         {
             EventAggregator.GetEvent<AfterDetailSavedEvent>().Publish(new

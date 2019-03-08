@@ -56,13 +56,10 @@
         
         <GroupBox Header="Meetings" Grid.Row="1">
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Auto">
-
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Meetings}"
-                      ItemContainerStyle="{StaticResource NaviItemContainerStyle}"
-                      ItemTemplate="{StaticResource NaviItemTemplate}"/>
-                
+                              ItemContainerStyle="{StaticResource NaviItemContainerStyle}"
+                              ItemTemplate="{StaticResource NaviItemTemplate}"/>
             </ScrollViewer>
         </GroupBox>
     </Grid>

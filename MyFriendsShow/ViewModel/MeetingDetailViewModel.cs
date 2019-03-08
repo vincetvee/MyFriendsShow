@@ -4,45 +4,44 @@ using MyFriendsShow.Wrapper;
 using Prism.Commands;
 using Prism.Events;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MyFriendsShow.ViewModel
 {
-    public  class MeetingDetailViewModel : DetailViewModelBase,IMeetingDetailViewModel
+  public class MeetingDetailViewModel : DetailViewModelBase, IMeetingDetailViewModel
     {
-        private  IMeetingRepository _meetingRepository;
-        private MeetingWrapper _meeting;
+        private IMeetingRepository _meetingRepository;
 
-        public MeetingDetailViewModel(IEventAggregator eventAggregator, 
-            IMeetingRepository meetingRepository) : base(eventAggregator)
+        public MeetingDetailViewModel( IEventAggregator eventAggregator,
+            IMeetingRepository meetingRepository):base(eventAggregator)
         {
             _meetingRepository = meetingRepository;
         }
 
-         
+        private MeetingWrapper _meeting;
+
         public MeetingWrapper Meeting
         {
             get { return _meeting; }
-             private set
-            {
-                _meeting = value;
-                OnPropertyChanged(); 
-            }
+            private set { _meeting = value; }
         }
 
-        public override  async Task LoadAsync(int? meetingId)
+        public override  async Task LoadAsync(int?  meetingId)
         {
             var meeting = meetingId.HasValue
-                ? await _meetingRepository.GetByIdAsync(meetingId.Value)
-                : CreeateNewMeeting();
+                 ? await _meetingRepository.GetByIdAsync(meetingId.Value)
+                 : CreateNewMeeting();
 
             InitializeMeeting(meeting);
+
         }
 
 
         protected override void OnDeleteExecute()
         {
-            _meetingRepository.Remove(Meeting.Model);
             _meetingRepository.SaveAsync();
             RaiseDetailDeletedEvent(Meeting.Id);
 
@@ -53,19 +52,20 @@ namespace MyFriendsShow.ViewModel
             return Meeting != null && !Meeting.HasErrors && HasChanges;
         }
 
-        protected override  async void OnSaveExecute()
+        protected override async void OnSaveExecute()
         {
             await _meetingRepository.SaveAsync();
             HasChanges = _meetingRepository.HasChanges();
             RaiseDetailSaveEvent(Meeting.Id, Meeting.Title);
         }
-        private Meeting CreeateNewMeeting()
+        private Meeting CreateNewMeeting()
         {
             var meeting = new Meeting
             {
                 DateFrom = DateTime.Now.Date,
                 DateTo = DateTime.Now.Date
             };
+
             _meetingRepository.Add(meeting);
             return meeting;
         }
@@ -74,18 +74,26 @@ namespace MyFriendsShow.ViewModel
         {
             Meeting = new MeetingWrapper(meeting);
             Meeting.PropertyChanged += (s, e) =>
-            {
-                if (!HasChanges)
-                {
-                    HasChanges = _meetingRepository.HasChanges();
-                }
-                if (e.PropertyName == nameof(Meeting.HasErrors))
-                {
-                    ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+             {
+                 if (!HasChanges)
+                 {
+                     HasChanges = _meetingRepository.HasChanges();
 
-                }
-            };
+                 }
+                 if (e.PropertyName == nameof(Meeting.HasErrors))
+                 {
+                     ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+                 }
+             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
+
+            if (Meeting.Id == 0)
+            {
+                // little trick to trigger the validation
+                Meeting.Title = "";
+            }
+
         }
+
     }
 }
