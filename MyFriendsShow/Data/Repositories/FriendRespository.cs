@@ -1,6 +1,7 @@
 ﻿using FriendShowDataAccess;
 using FriendsShow.Model;
 using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyFriendsShow.Data.Repositories
@@ -24,6 +25,13 @@ namespace MyFriendsShow.Data.Repositories
                 .Include(f => f.PhoneNumbers)
                 .SingleAsync(f =>f.Id == friendId);
          
+        }
+
+        public async Task<bool> HasMeetingsAsync(int friendId)
+        {
+            return await Context.Meetings.AsNoTracking()
+                .Include(m => m.Friends)
+                .AnyAsync(m => m.Friends.Any(f => f.Id == friendId));
         }
     
 

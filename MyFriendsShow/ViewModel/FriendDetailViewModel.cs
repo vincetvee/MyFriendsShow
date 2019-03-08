@@ -2,6 +2,7 @@
 using MyFriendsShow.Data.LookUps;
 using MyFriendsShow.Data.Repositories;
 using MyFriendsShow.Event;
+using MyFriendsShow.View.Service;
 using MyFriendsShow.Wrapper;
 using Prism.Commands;
 using Prism.Events;
@@ -21,6 +22,7 @@ namespace MyFriendsShow.ViewModel
         public ObservableCollection<LookupItem> ProgrammingLanguages { get; }
         public ObservableCollection<FriendPhoneNumberWrapper> PhoneNumbers { get; }
 
+        private IMessageDialogService _messageDialogService;
         private IFriendRepository _friendRepository;
         
         private IProgrammingLanguageLookupDataService _programmingLanguageLookupDataService;
@@ -30,8 +32,10 @@ namespace MyFriendsShow.ViewModel
 
         public FriendDetailViewModel( IFriendRepository friendRepository, 
             IEventAggregator eventAggregator,
+            IMessageDialogService messageDialogService,
             IProgrammingLanguageLookupDataService programmingLanguageLookupDataService):base(eventAggregator) 
         {
+            _messageDialogService = messageDialogService;
             _friendRepository = friendRepository;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
            
@@ -159,9 +163,19 @@ namespace MyFriendsShow.ViewModel
 
         protected  override async void OnDeleteExecute()
         {
+            if (await _friendRepository.HasMeetingsAsync(Friend.Id))
+            {
+                _messageDialogService.ShowInforDailog($"{Friend.FirstName} {Friend.LastName} can't be deleted,, as this friend is part of at least one meeting");
+                return;
+            }
+            var result = _messageDialogService.ShowOkCancelDialog($"Do you really want to Delete the Friend {Friend.FirstName} {Friend.LastName} ?",
+                "Question");
+            if (result == MessageDialogResult.OK)
+            {
             _friendRepository.Remove(Friend.Model);
             await _friendRepository.SaveAsync();
             RaiseDetailDeletedEvent(Friend.Id);
+            }
         }
          
         private void OnAddPhoneNumberExecute()

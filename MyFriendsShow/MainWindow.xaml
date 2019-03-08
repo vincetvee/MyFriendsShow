@@ -18,7 +18,7 @@
             <view:MeetingDetailtView/>
         </DataTemplate>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,25 +26,25 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="433*"/>
+            <ColumnDefinition Width="59*"/>
         </Grid.ColumnDefinitions>
-        <Menu Grid.ColumnSpan="3" FontSize="20">
+        <Menu Grid.ColumnSpan="2" FontSize="20">
             <MenuItem Header="Create">
                 <MenuItem Header="New Friend" Command="{Binding CreateNewDetailCommand}"
                           CommandParameter="{x:Type viewModel:FriendDetailViewModel }"/>
-                
+
                 <MenuItem Header="New Meeting" Command="{Binding CreateNewDetailCommand}"
                           CommandParameter="{x:Type viewModel:MeetingDetailViewModel }"/>
-                </MenuItem>
+            </MenuItem>
         </Menu>
-        
+
         <view:NavigationView Grid.Row="1"
                              DataContext="{Binding NavigationViewModel}" />
         <ContentControl  Grid.Row="1"
                          Grid.Column="1"
                          Content="{Binding DetailViewModel}"/>
-      
+
 
 
     </Grid>

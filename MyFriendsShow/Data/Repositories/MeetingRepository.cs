@@ -2,7 +2,7 @@
 using FriendsShow.Model;
 using System.Threading.Tasks;
 using System.Data.Entity;
-
+using System.Collections.Generic;
 
 namespace MyFriendsShow.Data.Repositories
 {
@@ -19,5 +19,11 @@ namespace MyFriendsShow.Data.Repositories
                  .SingleAsync(m => m.Id == id);
 
         }
+        public async Task<List<Friend>>GetAllFriendsAsync()
+        {
+            return await Context.Set<Friend>().ToListAsync();
+        }
+
+        
     }
 }

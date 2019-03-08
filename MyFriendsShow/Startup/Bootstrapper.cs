@@ -2,6 +2,7 @@
 using FriendShowDataAccess;
 using MyFriendsShow.Data.LookUps;
 using MyFriendsShow.Data.Repositories;
+using MyFriendsShow.View.Service;
 using MyFriendsShow.ViewModel;
 using Prism.Events;
 
@@ -17,6 +18,7 @@ namespace MyFriendsShow.Startup
             builder.RegisterType<FriendsShowDbContext>().AsSelf();
 
             builder.RegisterType<MainWindow>().AsSelf();
+            builder.RegisterType<MessageDialogService>().As<IMessageDialogService>();
             builder.RegisterType<MainViewModel>().AsSelf();
             builder.RegisterType<NavigationViewModel>().As<INavigationViewModel>();
             
