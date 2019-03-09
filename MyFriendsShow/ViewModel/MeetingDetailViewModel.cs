@@ -87,6 +87,7 @@ namespace MyFriendsShow.ViewModel
 
             AddedFriends.Clear();
             AvailableFriends.Clear();
+             
             foreach (var addedFriend in addedFriends)
             {
                 AddedFriends.Add(addedFriend);
@@ -150,11 +151,11 @@ namespace MyFriendsShow.ViewModel
              };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
-            if (Meeting.Id == 0)
-            {
-                // little trick to trigger the validation
-                Meeting.Title = "";
-            }
+            //if (Meeting.Id == 0)
+            //{
+            //    // little trick to trigger the validation
+            //    Meeting.Title = "";
+            //}
 
         }
 
