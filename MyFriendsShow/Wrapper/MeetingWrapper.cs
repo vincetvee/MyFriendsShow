@@ -15,7 +15,8 @@ namespace MyFriendsShow.Wrapper
         
         public int Id { get { return Model.Id; } }
 
-        public string Title {
+        public string Title
+        {
             get { return GetValue<string>(); }
             set {SetValue(value); }
         }

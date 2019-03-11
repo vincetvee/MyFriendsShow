@@ -12,18 +12,27 @@ namespace MyFriendsShow.ViewModel
 {
     public abstract  class DetailViewModelBase : ViewModelBase, IDetailViewModel
     {
-        private readonly IEventAggregator EventAggregator;
-      public ICommand SaveCommand { get; private set; }
-      public ICommand DeleteCommand { get; private set; }
-
-        public abstract Task LoadAsync(int? id);
-
         public DetailViewModelBase(IEventAggregator eventAggregator)
         {
             EventAggregator = eventAggregator;
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
         }
+
+      private int _id;
+      private readonly IEventAggregator EventAggregator;
+      public ICommand SaveCommand { get; private set; }
+      public ICommand DeleteCommand { get; private set; }
+
+
+        public int Id
+        {
+            get { return _id; }
+            protected set { _id = value; }
+        }
+
+        public abstract Task LoadAsync(int? id);
+
 
         public bool HasChanges
         {

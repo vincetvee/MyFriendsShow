@@ -53,9 +53,14 @@ namespace MyFriendsShow.ViewModel
                 ? await _friendRepository.GetByIdAsync(friendId.Value)
                 : CreateNewFriend();
 
+            Id = friend.Id;
+
             InitializeFriend(friend);
+
             InitializeFriendPhoneNumbers(friend.PhoneNumbers);
+
             await LoadProgrammingLanguagesLookupAsync();
+
         }
 
         private void InitializeFriendPhoneNumbers(ICollection<FriendPhoneNumber> phoneNumbers)
@@ -150,6 +155,7 @@ namespace MyFriendsShow.ViewModel
         {
            await  _friendRepository.SaveAsync();
             HasChanges = _friendRepository.HasChanges();
+            Id = Friend.Id;
             RaiseDetailSaveEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
         }
 

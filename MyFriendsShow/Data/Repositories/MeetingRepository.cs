@@ -21,7 +21,8 @@ namespace MyFriendsShow.Data.Repositories
         }
         public async Task<List<Friend>>GetAllFriendsAsync()
         {
-            return await Context.Set<Friend>().ToListAsync();
+            return await Context.Set<Friend>()
+                 .ToListAsync();
         }
 
         

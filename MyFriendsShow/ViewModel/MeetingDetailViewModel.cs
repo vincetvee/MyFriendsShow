@@ -18,16 +18,16 @@ namespace MyFriendsShow.ViewModel
     {
         private IMeetingRepository _meetingRepository;
         private IMessageDialogService _messageDialogService;
+        private MeetingWrapper _meeting;
+        private Friend _selectedAvailableFriend;
+        private Friend _selectedAddedFriend;
+        private List<Friend> _allFriends;
 
         public ICommand AddFriendCommand { get; }
         public ICommand RemoveFriendCommand { get; }
         public ObservableCollection<Friend> AddedFriends { get; }
         public ObservableCollection<Friend> AvailableFriends { get; }
 
-        private MeetingWrapper _meeting;
-        private Friend _selectedAvailableFriend;
-        private Friend _selectedAddedFriend;
-        private List<Friend> _allFriends;
 
         public MeetingDetailViewModel( IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
@@ -35,10 +35,28 @@ namespace MyFriendsShow.ViewModel
         {
             _meetingRepository = meetingRepository;
             _messageDialogService = messageDialogService;
+
+
             AddedFriends = new ObservableCollection<Friend>();
             AvailableFriends = new ObservableCollection<Friend>();
+
             AddFriendCommand = new DelegateCommand(OnAddFriendExecute, OnAddFriendCanExecute);
             RemoveFriendCommand = new DelegateCommand(OnRemoveFriendExecute, OnRemoveFriendCanExecute);
+        }
+
+
+        public override  async Task LoadAsync(int?  meetingId)
+        {
+            var meeting = meetingId.HasValue
+                 ? await _meetingRepository.GetByIdAsync(meetingId.Value)
+                 : CreateNewMeeting();
+
+            Id = meeting.Id;
+            InitializeMeeting(meeting);
+
+            _allFriends = await _meetingRepository.GetAllFriendsAsync();
+
+            SetUpPicklist();
         }
 
         public Friend SelectedAvailableFriend
@@ -65,19 +83,13 @@ namespace MyFriendsShow.ViewModel
         public MeetingWrapper Meeting
         {
             get { return _meeting; }
-            private set { _meeting = value; }
+            private set
+            {
+                _meeting = value;
+                OnPropertyChanged();
+            }
         }
 
-        public override  async Task LoadAsync(int?  meetingId)
-        {
-            var meeting = meetingId.HasValue
-                 ? await _meetingRepository.GetByIdAsync(meetingId.Value)
-                 : CreateNewMeeting();
-
-            InitializeMeeting(meeting);
-            _allFriends = await _meetingRepository.GetAllFriendsAsync();
-            SetUpPicklist();
-        }
 
         private void SetUpPicklist()
         {
@@ -92,6 +104,7 @@ namespace MyFriendsShow.ViewModel
             {
                 AddedFriends.Add(addedFriend);
             }
+
             foreach (var availableFriend in availableFriends)
             {
                 AvailableFriends.Add(availableFriend);
@@ -119,6 +132,7 @@ namespace MyFriendsShow.ViewModel
         {
             await _meetingRepository.SaveAsync();
             HasChanges = _meetingRepository.HasChanges();
+            Id = Meeting.Id;
             RaiseDetailSaveEvent(Meeting.Id, Meeting.Title);
         }
 
@@ -179,7 +193,7 @@ namespace MyFriendsShow.ViewModel
 
         private bool OnAddFriendCanExecute()
         {
-            return SelectedAddedFriend != null;
+            return SelectedAvailableFriend != null;
         }
 
         private void OnAddFriendExecute()

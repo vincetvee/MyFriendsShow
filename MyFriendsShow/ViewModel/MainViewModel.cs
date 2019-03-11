@@ -1,8 +1,11 @@
 ﻿using Autofac.Features.Indexed;
 using MyFriendsShow.Event;
+using MyFriendsShow.View.Service;
 using Prism.Commands;
 using Prism.Events;
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -11,27 +14,33 @@ namespace MyFriendsShow.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-       // private object _messageDialogService;
+  
 
          public ICommand CreateNewDetailCommand { get; }
         public INavigationViewModel NavigationViewModel { get; }
+        public ObservableCollection<IDetailViewModel> DetailViewModels { get;}
 
         private IIndex<string, IDetailViewModel> _detailViewModelCreator;
 
 
         private IEventAggregator _eventAggregator;
-        private IDetailViewModel _detailViewModel;
+        private IMessageDialogService _messageDialogService;
+        private IDetailViewModel _selecteddetailViewModel;
+     
 
         public MainViewModel(INavigationViewModel navigationViewModel,
            IIndex<string, IDetailViewModel>detailViewModelCreator,
-            IEventAggregator eventAggregator)
+            IEventAggregator eventAggregator,
+            IMessageDialogService messageDialogService)
         {
             _detailViewModelCreator = detailViewModelCreator;
            
 
             _eventAggregator = eventAggregator;
-           // _messageDialogService = messageDailogService;
-                
+            _messageDialogService = messageDialogService;
+
+
+            DetailViewModels = new ObservableCollection<IDetailViewModel>();
             _eventAggregator.GetEvent<OpenDetailViewEvent>()
                 .Subscribe(OnOpenDetailView);
             _eventAggregator.GetEvent<AfterDetailDeletedEvent>()
@@ -46,11 +55,12 @@ namespace MyFriendsShow.ViewModel
             await NavigationViewModel.LoadAsync();
         }
 
-        public IDetailViewModel DetailViewModel
+        public IDetailViewModel SelectedDetailViewModel
         {
-            get { return _detailViewModel; }
-            private set {
-                _detailViewModel = value;
+            get { return _selecteddetailViewModel; }
+            set
+            {
+                _selecteddetailViewModel = value;
                 OnPropertyChanged();
 
             }
@@ -58,18 +68,19 @@ namespace MyFriendsShow.ViewModel
 
         private async void OnOpenDetailView(OpenDetailViewEventArgs args)
         {
-            if (DetailViewModel !=null  && DetailViewModel.HasChanges)
+            var detailViewModel = DetailViewModels
+                .SingleOrDefault(vm => vm.Id == args.Id
+                && vm.GetType().Name == args.ViewModelName);
+
+            if (detailViewModel == null)
             {
-                var result = MessageBox.Show("you've made changes.Navigate away?", "Question", 
-                    MessageBoxButton.OKCancel);
-                if (result == MessageBoxResult.Cancel)
-                {
-                    return;
-                }
+               detailViewModel = _detailViewModelCreator[args.ViewModelName];
+                await detailViewModel.LoadAsync(args.Id);
+                DetailViewModels.Add(detailViewModel);
             }
 
-            DetailViewModel = _detailViewModelCreator[args.ViewModelName];
-            await DetailViewModel.LoadAsync(args.Id);
+            SelectedDetailViewModel = detailViewModel;
+           
         }
 
         private void OnCreateNewDetailExecute( Type viewModelType)
@@ -80,7 +91,14 @@ namespace MyFriendsShow.ViewModel
 
         private void AfterDetailDeleted(AfterDetailDeletedEventArgs args)
         {
-           DetailViewModel = null;
+            var detailViewModel = DetailViewModels
+                .SingleOrDefault(vm => vm.Id == args.Id
+                && vm.GetType().Name == args.ViewModelName);
+            if (detailViewModel == null)
+            {
+                DetailViewModels.Remove(detailViewModel);
+
+            }
         }
 
     }
