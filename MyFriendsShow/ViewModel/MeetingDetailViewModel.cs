@@ -162,6 +162,11 @@ namespace MyFriendsShow.ViewModel
                  {
                      ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
                  }
+                 if (e.PropertyName == nameof(Friend.FirstName)
+                 || e.PropertyName == nameof(Friend.LastName))
+                 {
+                     SetTitle();
+                 }
              };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
@@ -170,9 +175,14 @@ namespace MyFriendsShow.ViewModel
             //    // little trick to trigger the validation
             //    Meeting.Title = "";
             //}
+            SetTitle();
 
         }
 
+        private void SetTitle()
+        {
+            Title = Meeting.Title;
+        }
 
         private bool OnRemoveFriendCanExecute()
         {

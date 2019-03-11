@@ -1,10 +1,6 @@
 ﻿using MyFriendsShow.Event;
 using Prism.Commands;
 using Prism.Events;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -20,6 +16,7 @@ namespace MyFriendsShow.ViewModel
         }
 
       private int _id;
+      private string _title;
       private readonly IEventAggregator EventAggregator;
       public ICommand SaveCommand { get; private set; }
       public ICommand DeleteCommand { get; private set; }
@@ -29,6 +26,17 @@ namespace MyFriendsShow.ViewModel
         {
             get { return _id; }
             protected set { _id = value; }
+        }
+
+
+        public string Title
+        {
+            get { return _title; }
+            protected set
+            {
+                _title = value;
+                OnPropertyChanged();
+            }
         }
 
         public abstract Task LoadAsync(int? id);

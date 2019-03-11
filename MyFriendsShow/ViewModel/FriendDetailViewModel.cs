@@ -6,6 +6,7 @@ using MyFriendsShow.View.Service;
 using MyFriendsShow.Wrapper;
 using Prism.Commands;
 using Prism.Events;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -103,6 +104,11 @@ namespace MyFriendsShow.ViewModel
                 {
                     ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
                 }
+                if (e.PropertyName == nameof(Friend.FirstName)
+                ||e.PropertyName == nameof(Friend.LastName))
+                {
+                    SetTitle();
+                 }
             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
             if (Friend.Id == 0)
@@ -110,6 +116,12 @@ namespace MyFriendsShow.ViewModel
                 //little trick to trigger the validation
                 Friend.FirstName = "";
             }
+            SetTitle();
+        }
+
+        private void SetTitle()
+        {
+           Title = $"{Friend.FirstName} {Friend.FirstName}";
         }
 
         private async Task LoadProgrammingLanguagesLookupAsync()
