@@ -23,7 +23,7 @@ namespace MyFriendsShow.ViewModel
         public ObservableCollection<LookupItem> ProgrammingLanguages { get; }
         public ObservableCollection<FriendPhoneNumberWrapper> PhoneNumbers { get; }
 
-        private IMessageDialogService _messageDialogService;
+     
         private IFriendRepository _friendRepository;
         
         private IProgrammingLanguageLookupDataService _programmingLanguageLookupDataService;
@@ -34,9 +34,9 @@ namespace MyFriendsShow.ViewModel
         public FriendDetailViewModel( IFriendRepository friendRepository, 
             IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
-            IProgrammingLanguageLookupDataService programmingLanguageLookupDataService):base(eventAggregator) 
+            IProgrammingLanguageLookupDataService programmingLanguageLookupDataService):base(eventAggregator,messageDialogService) 
         {
-            _messageDialogService = messageDialogService;
+          
             _friendRepository = friendRepository;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
            
@@ -48,13 +48,13 @@ namespace MyFriendsShow.ViewModel
         }
 
 
-        public override async Task LoadAsync(int? friendId)
+        public override async Task LoadAsync(int friendId)
         {
-            var friend = friendId.HasValue
-                ? await _friendRepository.GetByIdAsync(friendId.Value)
+            var friend = friendId > 0
+                ? await _friendRepository.GetByIdAsync(friendId)
                 : CreateNewFriend();
 
-            Id = friend.Id;
+            Id = friendId;
 
             InitializeFriend(friend);
 
@@ -121,7 +121,7 @@ namespace MyFriendsShow.ViewModel
 
         private void SetTitle()
         {
-           Title = $"{Friend.FirstName} {Friend.FirstName}";
+           Title = $"{Friend.FirstName} {Friend.LastName} ";
         }
 
         private async Task LoadProgrammingLanguagesLookupAsync()
@@ -183,10 +183,10 @@ namespace MyFriendsShow.ViewModel
         {
             if (await _friendRepository.HasMeetingsAsync(Friend.Id))
             {
-                _messageDialogService.ShowInforDailog($"{Friend.FirstName} {Friend.LastName} can't be deleted,, as this friend is part of at least one meeting");
+                MessageDialogService.ShowInforDailog($"{Friend.FirstName} {Friend.LastName} can't be deleted,, as this friend is part of at least one meeting");
                 return;
             }
-            var result = _messageDialogService.ShowOkCancelDialog($"Do you really want to Delete the Friend {Friend.FirstName} {Friend.LastName} ?",
+            var result = MessageDialogService.ShowOkCancelDialog($"Do you really want to Delete the Friend {Friend.FirstName} {Friend.LastName} ?",
                 "Question");
             if (result == MessageDialogResult.OK)
             {

@@ -3,6 +3,7 @@ using FriendsShow.Model;
 using System.Threading.Tasks;
 using System.Data.Entity;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MyFriendsShow.Data.Repositories
 {
@@ -25,6 +26,14 @@ namespace MyFriendsShow.Data.Repositories
                  .ToListAsync();
         }
 
-        
+        public  async Task ReloadFriendAsync(int friendId)
+        {
+            var dbEntityEntry = Context.ChangeTracker.Entries<Friend>()
+                .SingleOrDefault(db => db.Entity.Id == friendId);
+            if (dbEntityEntry != null)
+            {
+                await dbEntityEntry.ReloadAsync();
+            }
+        }
     }
 }
