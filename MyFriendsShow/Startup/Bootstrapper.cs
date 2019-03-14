@@ -26,13 +26,16 @@ namespace MyFriendsShow.Startup
                 .Keyed<IDetailViewModel>(nameof(FriendDetailViewModel));
             builder.RegisterType<MeetingDetailViewModel>()
                 .Keyed<IDetailViewModel>(nameof(MeetingDetailViewModel));
-           
+            builder.RegisterType<ProgrammingLanguageDetailViewModel>()
+                 .Keyed<IDetailViewModel>(nameof(ProgrammingLanguageDetailViewModel));
 
 
 
             builder.RegisterType<LookupDataService>().AsImplementedInterfaces();
             builder.RegisterType<FriendRespository>().As<IFriendRepository>();
             builder.RegisterType<MeetingRepository>().As<IMeetingRepository>();
+            builder.RegisterType<ProgrammingLanguageRepository>()
+                .As<IProgrammingLanguageRepository>();
 
             return builder.Build();
         }

@@ -54,12 +54,11 @@
                 <Button Content="&lt;&lt;" Margin="10" Command="{Binding AddFriendCommand}"/>
                 <Button Content="&gt;&gt;"  Margin="10 0 10 10" Command="{Binding RemoveFriendCommand}"/>
             </StackPanel>
-            
+
             <Label Content="Available Friends" Grid.Column="2"/>
             <ListView Grid.Row="1" ItemsSource="{Binding AvailableFriends}"
                       SelectedItem="{Binding SelectedAvailableFriend}" Grid.Column="2"/>
         </Grid>
-
 
         <StackPanel Grid.Row="7" Orientation="Horizontal">
             <Button Content="Save" Width="75" Margin="10" Command="{Binding SaveCommand}"/>

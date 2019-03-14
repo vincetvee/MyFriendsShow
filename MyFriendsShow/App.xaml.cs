@@ -1,7 +1,5 @@
-﻿ using Autofac;
-using MyFriendsShow.Data;
+﻿using Autofac;
 using MyFriendsShow.Startup;
-using MyFriendsShow.ViewModel;
 using System;
 using System.Windows;
 
@@ -10,6 +8,7 @@ namespace MyFriendsShow
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
+    
     public partial class App : Application
     {
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -28,4 +27,5 @@ namespace MyFriendsShow
             e.Handled = true;
         }
     }
+
 }

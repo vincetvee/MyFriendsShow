@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,15 +32,17 @@ namespace MyFriendsShow.ViewModel
         private FriendPhoneNumberWrapper _selectedPhoneNumber;
        
 
-        public FriendDetailViewModel( IFriendRepository friendRepository, 
-            IEventAggregator eventAggregator,
+        public FriendDetailViewModel( IFriendRepository friendRepository, IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
             IProgrammingLanguageLookupDataService programmingLanguageLookupDataService):base(eventAggregator,messageDialogService) 
         {
           
             _friendRepository = friendRepository;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
-           
+
+            eventAggregator.GetEvent<AfterCollectingSavedEvent>()
+                .Subscribe(AfterCollectionSaved);
+
             AddPhoneNumberCommand = new DelegateCommand(OnAddPhoneNumberExecute);
             RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute, OnRemovePhoneNumberCanExecute);
 
@@ -165,10 +168,16 @@ namespace MyFriendsShow.ViewModel
          
         protected override  async void OnSaveExecute()
         {
-           await  _friendRepository.SaveAsync();
-            HasChanges = _friendRepository.HasChanges();
-            Id = Friend.Id;
-            RaiseDetailSaveEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+            await SaveWithOptimiisticConcurrencyAsync(_friendRepository.SaveAsync,
+               () =>
+               {
+                HasChanges = _friendRepository.HasChanges();
+                Id = Friend.Id;
+                RaiseDetailSaveEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+
+               });
+         
+        
         }
 
         private Friend CreateNewFriend()
@@ -183,10 +192,10 @@ namespace MyFriendsShow.ViewModel
         {
             if (await _friendRepository.HasMeetingsAsync(Friend.Id))
             {
-                MessageDialogService.ShowInforDailog($"{Friend.FirstName} {Friend.LastName} can't be deleted,, as this friend is part of at least one meeting");
+               await MessageDialogService.ShowInfoDialogAsync($"{Friend.FirstName} {Friend.LastName} can't be deleted,, as this friend is part of at least one meeting");
                 return;
             }
-            var result = MessageDialogService.ShowOkCancelDialog($"Do you really want to Delete the Friend {Friend.FirstName} {Friend.LastName} ?",
+            var result =await MessageDialogService.ShowOkCancelDialogAsync($"Do you really want to Delete the Friend {Friend.FirstName} {Friend.LastName} ?",
                 "Question");
             if (result == MessageDialogResult.OK)
             {
@@ -218,6 +227,24 @@ namespace MyFriendsShow.ViewModel
         private bool OnRemovePhoneNumberCanExecute()
         {
             return SelectedPhoneNumber != null; 
+        }
+        private async void AfterCollectionSaved(AfterCollectionSavedEventArgs args)
+        {
+            if (args.ViewModelName == nameof(ProgrammingLanguageDetailViewModel))
+            {
+                await LoadProgrammingLanguageLookupAsync();
+            }
+        }
+
+        private  async Task LoadProgrammingLanguageLookupAsync()
+        {
+            ProgrammingLanguages.Clear();
+            ProgrammingLanguages.Add(new NullLookupItem { DisplayMember = " - " });
+            var lookup = await _programmingLanguageLookupDataService.GetProgrammingLanguageLookupAsync();
+            foreach (var lookupItem in lookup)
+            {
+                ProgrammingLanguages.Add(lookupItem);
+            }
         }
     }
     

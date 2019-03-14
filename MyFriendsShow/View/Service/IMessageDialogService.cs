@@ -1,9 +1,11 @@
-﻿namespace MyFriendsShow.View.Service
+﻿using System.Threading.Tasks;
+
+namespace MyFriendsShow.View.Service
 {
     public interface IMessageDialogService
     {
-        MessageDialogResult ShowOkCancelDialog(string text, string title);
-        void ShowInforDailog(string text);
+       Task<MessageDialogResult> ShowOkCancelDialogAsync(string text, string title);
+        Task ShowInfoDialogAsync(string text);
     
     }
 }

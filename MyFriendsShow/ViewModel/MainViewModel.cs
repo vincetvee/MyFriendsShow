@@ -7,24 +7,27 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MyFriendsShow.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-         public ICommand CreateNewDetailCommand { get; }
+        public ICommand CreateNewDetailCommand { get; }
+
+        public  ICommand OpenSingleDetailViewCommand { get; set; }
+
         public INavigationViewModel NavigationViewModel { get; }
+
         public ObservableCollection<IDetailViewModel> DetailViewModels { get;}
 
         private IIndex<string, IDetailViewModel> _detailViewModelCreator;
 
-
         private IEventAggregator _eventAggregator;
+
         private IMessageDialogService _messageDialogService;
+
         private IDetailViewModel _selecteddetailViewModel;
-     
 
         public MainViewModel(INavigationViewModel navigationViewModel,
            IIndex<string, IDetailViewModel>detailViewModelCreator,
@@ -48,9 +51,11 @@ namespace MyFriendsShow.ViewModel
                 .Subscribe(AfterDetailClosed);
 
              CreateNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
+            OpenSingleDetailViewCommand = new DelegateCommand<Type>(OpenSingleDetailViewExecute);
 
              NavigationViewModel = navigationViewModel;
         }
+
         public async Task LoadAsync()
         {
             await NavigationViewModel.LoadAsync();
@@ -76,12 +81,23 @@ namespace MyFriendsShow.ViewModel
             if (detailViewModel == null)
             {
                detailViewModel = _detailViewModelCreator[args.ViewModelName];
+                try
+                {
                 await detailViewModel.LoadAsync(args.Id);
+
+                }
+                catch
+                {
+
+                  await  _messageDialogService.ShowInfoDialogAsync("Could not load the entity," +
+                        "maybe it was deleted in the meantime by another user. " +
+                        "The navigation is refreshed for you.");
+                    await NavigationViewModel.LoadAsync();
+                    return;
+                }
                 DetailViewModels.Add(detailViewModel);
             }
-
             SelectedDetailViewModel = detailViewModel;
-           
         }
 
 
@@ -93,6 +109,16 @@ namespace MyFriendsShow.ViewModel
                 new OpenDetailViewEventArgs
                 {
                     Id = nextNewItemId --,
+                    ViewModelName = viewModelType.Name
+                });
+        }
+
+        private void OpenSingleDetailViewExecute(Type viewModelType)
+        {
+            OnOpenDetailView(
+                new OpenDetailViewEventArgs
+                {
+                    Id = -1,
                     ViewModelName = viewModelType.Name
                 });
         }
